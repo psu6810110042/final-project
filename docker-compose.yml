@@ -1,70 +1,15 @@
 services:
     db:
         image: postgres:15-alpine
-        container_name: medicine_store
-        restart: unless-stopped
+        container_name: medicine_db
         environment:
-            POSTGRES_USER: adminsorn
-            POSTGRES_PASSWORD: adminsorn123
-            POSTGRES_DB: medicine_db
+            POSTGRES_USER: admin
+            POSTGRES_PASSWORD: password
+            POSTGRES_DB: medicine_store
         ports:
             - "5432:5432"
-        networks:
-            - medicine-network-dev
         volumes:
             - postgres_data:/var/lib/postgresql/data
 
-    server:
-        build:
-            context: ./back_end
-            dockerfile: Dockerfile
-        container_name: medicine_back_end
-        restart: unless-stopped
-        ports:
-            - "3000:3000"
-        volumes:
-            # Mount source code for hot reload
-            - ./back_end/src:/app/src
-            - ./back_end/tsconfig.json:/app/tsconfig.json
-            - ./back_end/tsconfig.build.json:/app/tsconfig.build.json
-            - ./back_end/nest-cli.json:/app/nest-cli.json
-        environment:
-            DB_HOST: db
-            DB_PORT: 5432
-            DB_USER: adminsorn
-            DB_PASS: adminsorn
-            DB_NAME: medicine_db
-            JWT_SECRET: "super_secret_key_change_this"
-        depends_on:
-            - db
-        networks:
-            - medicine-network-dev
-
-    client:
-        build:
-            context: ./front_end
-            dockerfile: Dockerfile
-        container_name: medicine_front_end
-        restart: unless-stopped
-        ports:
-            - "5173:5173"
-        volumes:
-            - ./front_end/src:/app/src
-            - ./front_end/public:/app/public # Added
-            - ./front_end/index.html:/app/index.html # Added
-            - ./front_end/tsconfig.json:/app/tsconfig.json
-            - ./front_end/tsconfig.app.json:/app/tsconfig.app.json
-            - ./front_end/vite.config.ts:/app/vite.config.ts
-        environment:
-            - VITE_API_URL=http://localhost:3000
-        depends_on:
-            - server
-        networks:
-            - medicine-network-dev
-
 volumes:
     postgres_data:
-
-networks:
-    medicine-network-dev:
-        driver: bridge
